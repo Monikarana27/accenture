@@ -4,12 +4,20 @@ import { CheckCircle, Circle, Calendar, Code, Brain, BookOpen, Target, Clock, St
 const AccentureOAPlan = () => {
   const [completedTasks, setCompletedTasks] = useState({});
   const [activeWeek, setActiveWeek] = useState(0);
+  const [weekNotes, setWeekNotes] = useState({});
 
   const toggleTask = (weekIndex, dayIndex, taskIndex) => {
     const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
     setCompletedTasks(prev => ({
       ...prev,
       [key]: !prev[key]
+    }));
+  };
+
+  const updateWeekNotes = (weekIndex, notes) => {
+    setWeekNotes(prev => ({
+      ...prev,
+      [weekIndex]: notes
     }));
   };
 
@@ -354,6 +362,29 @@ const AccentureOAPlan = () => {
               <span className="text-purple-600 flex items-center gap-1">
                 <Target size={16} /> {weeks[activeWeek].focus}
               </span>
+            </div>
+          </div>
+
+          {/* Week Notes Section */}
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <BookOpen className="text-blue-600" size={20} />
+              Week Notes & Key Learnings
+            </h3>
+            <textarea
+              value={weekNotes[activeWeek] || ''}
+              onChange={(e) => updateWeekNotes(activeWeek, e.target.value)}
+              placeholder="Add your notes here:
+• What went well this week?
+• Which topics need more practice?
+• Key patterns or concepts learned
+• Mistakes to avoid
+• Mock test scores and insights"
+              className="w-full h-32 p-4 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none resize-none text-gray-700 placeholder-gray-400"
+            />
+            <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+              <AlertCircle size={12} />
+              Your notes are saved automatically as you type
             </div>
           </div>
 
