@@ -1,0 +1,499 @@
+import React, { useState } from 'react';
+import { CheckCircle, Circle, Calendar, Code, Brain, BookOpen, Target, Clock, Star, AlertCircle } from 'lucide-react';
+
+const AccentureOAPlan = () => {
+  const [completedTasks, setCompletedTasks] = useState({});
+  const [activeWeek, setActiveWeek] = useState(0);
+
+  const toggleTask = (weekIndex, dayIndex, taskIndex) => {
+    const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
+    setCompletedTasks(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const weeks = [
+    {
+      title: "Week 1: Foundation Building",
+      dates: "Dec 4-10",
+      focus: "Assess Current Level + Core Basics",
+      days: [
+        {
+          day: "Days 1-2",
+          title: "Diagnostic Assessment",
+          tasks: [
+            { icon: Code, text: "Take HackerRank/LeetCode diagnostic test", time: "2-3 hrs" },
+            { icon: Brain, text: "Solve 5 Easy problems (Arrays, Strings)", time: "1-2 hrs" },
+            { icon: Target, text: "Take aptitude mock test on PrepInsta", time: "1 hr" },
+            { icon: BookOpen, text: "Identify weak areas and create mistake log", time: "30 min" }
+          ]
+        },
+        {
+          day: "Days 3-7",
+          title: "Core Foundations",
+          tasks: [
+            { icon: Code, text: "Array basics: rotation, max/min, duplicates (2-3 problems daily)", time: "2 hrs" },
+            { icon: Code, text: "String basics: reverse, palindrome, anagram (2-3 problems daily)", time: "1 hr" },
+            { icon: Brain, text: "Aptitude: Percentages, Ratios, Time-Work (IndiaBix)", time: "1 hr" },
+            { icon: Brain, text: "Logical: Patterns, sequences, blood relations (10-15 Qs)", time: "30 min" },
+            { icon: BookOpen, text: "Verbal: Grammar rules + 10 new words daily", time: "20 min" },
+            { icon: BookOpen, text: "Read 1 article from The Hindu/Economic Times", time: "15 min" }
+          ]
+        },
+        {
+          day: "Weekend",
+          title: "First Mock Test",
+          tasks: [
+            { icon: Target, text: "Full Accenture-style mock test (90 min, timed)", time: "90 min" },
+            { icon: AlertCircle, text: "Analyze mistakes and update mistake log", time: "30 min" }
+          ]
+        }
+      ]
+    },
+    {
+      title: "Week 2: Intermediate Problem Solving",
+      dates: "Dec 11-17",
+      focus: "Pattern Recognition + Speed Building",
+      days: [
+        {
+          day: "Daily Routine",
+          title: "Core Practice",
+          tasks: [
+            { icon: Code, text: "Arrays: Binary search, two-pointer, sliding window", time: "1 hr" },
+            { icon: Code, text: "Strings: Substring problems, pattern matching", time: "1 hr" },
+            { icon: Code, text: "Math: Prime, Armstrong, GCD/LCM, Fibonacci", time: "45 min" },
+            { icon: Code, text: "Sorting: Bubble, Selection, Insertion (understand logic)", time: "30 min" },
+            { icon: Brain, text: "Aptitude speed drills (aim 45-60 sec per question)", time: "45 min" },
+            { icon: Brain, text: "Logical: Syllogisms, coding-decoding", time: "30 min" },
+            { icon: BookOpen, text: "Verbal: Sentence correction + 2-3 passages", time: "20 min" }
+          ]
+        },
+        {
+          day: "Alt Days",
+          title: "Data Structures Basics",
+          tasks: [
+            { icon: Code, text: "HashMap: Frequency counting, finding duplicates", time: "30 min" },
+            { icon: Code, text: "Stack: Parenthesis matching, reverse operations", time: "30 min" },
+            { icon: Code, text: "Queue: Basic operations (enqueue, dequeue)", time: "20 min" }
+          ]
+        },
+        {
+          day: "Weekend",
+          title: "Mock Test #2",
+          tasks: [
+            { icon: Target, text: "Full mock test with strict timing", time: "90 min" },
+            { icon: AlertCircle, text: "Focus on time management (<2 min per MCQ)", time: "30 min" },
+            { icon: Code, text: "Review and optimize coding solutions", time: "30 min" }
+          ]
+        }
+      ]
+    },
+    {
+      title: "Week 3: Advanced Practice + Speed",
+      dates: "Dec 18-24",
+      focus: "Medium Problems + Pattern Mastery",
+      days: [
+        {
+          day: "Daily Routine",
+          title: "Level Up",
+          tasks: [
+            { icon: Code, text: "Move to Medium difficulty problems", time: "1.5 hrs" },
+            { icon: Code, text: "Pattern printing: Stars, pyramids, numbers", time: "1 hr" },
+            { icon: Code, text: "Matrix: Traversals, diagonal sums", time: "45 min" },
+            { icon: Code, text: "Recursion: Factorial, Fibonacci, sum of digits", time: "45 min" },
+            { icon: Brain, text: "Speed drills: 50 aptitude Qs in 25 min", time: "30 min" },
+            { icon: Brain, text: "Abstract reasoning + deductive logic", time: "30 min" }
+          ]
+        },
+        {
+          day: "3x This Week",
+          title: "Mock Coding Tests",
+          tasks: [
+            { icon: Code, text: "2 coding problems in 60 minutes (timed)", time: "1 hr" },
+            { icon: Target, text: "Simulate exact exam conditions", time: "-" }
+          ]
+        },
+        {
+          day: "Essay Practice",
+          title: "Communication Skills",
+          tasks: [
+            { icon: BookOpen, text: "Essay 1: Technology's role in modern business", time: "20 min" },
+            { icon: BookOpen, text: "Essay 2: Why I want to join Accenture", time: "20 min" },
+            { icon: AlertCircle, text: "Get feedback on structure and grammar", time: "15 min" }
+          ]
+        },
+        {
+          day: "Weekend",
+          title: "Intensive Mock Day",
+          tasks: [
+            { icon: Target, text: "Mock Test #3 (morning)", time: "90 min" },
+            { icon: Target, text: "Mock Test #4 (afternoon)", time: "90 min" },
+            { icon: AlertCircle, text: "Comprehensive analysis of both tests", time: "1 hr" }
+          ]
+        }
+      ]
+    },
+    {
+      title: "Week 4: Mastery + Weak Areas",
+      dates: "Dec 25-31",
+      focus: "Refinement + Edge Cases",
+      days: [
+        {
+          day: "Daily Routine",
+          title: "Refinement Phase",
+          tasks: [
+            { icon: Code, text: "Morning: Revisit 2 problems from mistake log", time: "1 hr" },
+            { icon: Code, text: "Afternoon: Solve 2 new Medium problems", time: "1 hr" },
+            { icon: Code, text: "Evening: 1 complex problem (45 min attempt)", time: "1 hr" },
+            { icon: AlertCircle, text: "Focus on clean code: comments, edge cases, variable names", time: "30 min" }
+          ]
+        },
+        {
+          day: "Alt Days",
+          title: "SQL Practice",
+          tasks: [
+            { icon: Code, text: "SELECT, WHERE, ORDER BY, GROUP BY", time: "15 min" },
+            { icon: Code, text: "JOINS (INNER, LEFT) on W3Schools/HackerRank", time: "15 min" }
+          ]
+        },
+        {
+          day: "2x This Week",
+          title: "Automation Prep",
+          tasks: [
+            { icon: Brain, text: "Learn RPA (Robotic Process Automation) basics", time: "20 min" },
+            { icon: Brain, text: "Practice logical sequencing questions", time: "15 min" }
+          ]
+        },
+        {
+          day: "3x This Week",
+          title: "More Essays",
+          tasks: [
+            { icon: BookOpen, text: "Essay: The impact of AI on software development", time: "20 min" },
+            { icon: BookOpen, text: "Essay: My career goals for next 5 years", time: "20 min" },
+            { icon: BookOpen, text: "Essay: Cloud computing transforming businesses", time: "20 min" }
+          ]
+        },
+        {
+          day: "Weekend",
+          title: "Peak Performance",
+          tasks: [
+            { icon: Target, text: "Mock Test #5 (Sat morning)", time: "90 min" },
+            { icon: Target, text: "Mock Test #6 (Sat evening)", time: "90 min" },
+            { icon: Target, text: "Mock Test #7 (Sun morning)", time: "90 min" },
+            { icon: AlertCircle, text: "Detailed analysis after each", time: "30 min each" }
+          ]
+        }
+      ]
+    },
+    {
+      title: "Week 5: Final Sprint",
+      dates: "Jan 1-11",
+      focus: "Revision + Confidence Building",
+      days: [
+        {
+          day: "Jan 1-7",
+          title: "Intensive Revision",
+          tasks: [
+            { icon: Code, text: "NO NEW TOPICS - only revision", time: "-" },
+            { icon: Code, text: "Create 'Top 30 Must-Know Problems' list", time: "1 hr" },
+            { icon: Code, text: "Daily mix: 2 Array + 2 String + 1 Math + 1 Pattern", time: "2 hrs" },
+            { icon: Brain, text: "Timed sectional tests: 20 min per section", time: "1 hr" },
+            { icon: Target, text: "Full mock on Jan 2, 4, 6, 8", time: "90 min" }
+          ]
+        },
+        {
+          day: "Jan 8-9",
+          title: "Tapering",
+          tasks: [
+            { icon: Code, text: "Solve only Easy problems for confidence", time: "1 hr" },
+            { icon: Brain, text: "Light aptitude practice", time: "30 min" },
+            { icon: BookOpen, text: "Review notes and cheat sheets", time: "30 min" }
+          ]
+        },
+        {
+          day: "Jan 10",
+          title: "Final Mock",
+          tasks: [
+            { icon: Target, text: "Last full mock test in morning", time: "90 min" },
+            { icon: BookOpen, text: "Quick formula/syntax revision in evening", time: "30 min" },
+            { icon: AlertCircle, text: "NO HEAVY STUDY - stay relaxed", time: "-" }
+          ]
+        },
+        {
+          day: "Jan 11",
+          title: "Rest Day",
+          tasks: [
+            { icon: Star, text: "NO NEW PROBLEMS", time: "-" },
+            { icon: BookOpen, text: "Review cheat sheet only", time: "15 min" },
+            { icon: AlertCircle, text: "Prepare laptop, test internet, keep documents ready", time: "30 min" },
+            { icon: Star, text: "Watch movie, get 7-8 hours sleep", time: "-" }
+          ]
+        }
+      ]
+    }
+  ];
+
+  const mustSolveProblems = [
+    "Second largest element in array",
+    "Sum of array elements with divisibility conditions",
+    "Reverse words in a string",
+    "Check if two strings are anagrams",
+    "Count frequency of each character",
+    "Find kth largest/smallest element",
+    "Rotate array left/right by K positions",
+    "Find pairs with given sum",
+    "Merge two sorted arrays",
+    "Check palindrome (ignore spaces/special chars)",
+    "Pattern printing (stars, numbers, pyramids)",
+    "Prime number check",
+    "Armstrong number check",
+    "Fibonacci series",
+    "GCD and LCM"
+  ];
+
+  const resources = {
+    free: [
+      { name: "GeeksforGeeks", use: "Coding problems + theory" },
+      { name: "HackerRank", use: "Practice + mock tests" },
+      { name: "LeetCode", use: "Coding problems (Easy-Medium)" },
+      { name: "IndiaBix", use: "Aptitude + Logical + Verbal" },
+      { name: "PrepInsta (Free)", use: "Accenture-specific mocks" },
+      { name: "W3Schools", use: "SQL practice" }
+    ],
+    paid: [
+      { name: "PrepInsta Prime", use: "₹199/month - Best Accenture mocks" },
+      { name: "HackerRank Premium", use: "More practice problems (optional)" }
+    ]
+  };
+
+  const examDayStrategy = [
+    {
+      phase: "Before Exam",
+      tips: [
+        "Sleep 7-8 hours the night before",
+        "Light breakfast, avoid heavy meals",
+        "Reach early (30 min) or setup workspace if online",
+        "Keep water, ID, admit card ready"
+      ]
+    },
+    {
+      phase: "Time Allocation",
+      tips: [
+        "Aptitude MCQs: 40-45 min (45-60 sec per question)",
+        "Coding (2 problems): 60 min (25 min + 30 min + 5 min testing)",
+        "Essay: 10-15 min (2 plan + 10 write + 2 proofread)",
+        "Total buffer: 5-10 min for review"
+      ]
+    },
+    {
+      phase: "Coding Strategy",
+      tips: [
+        "Read problem twice carefully",
+        "Identify input, output, constraints",
+        "Think of approach (5 min), then code (15-20 min)",
+        "Test with sample input + edge cases",
+        "Always check: empty array, single element, negatives, zeros"
+      ]
+    },
+    {
+      phase: "General Tips",
+      tips: [
+        "Start with your strength (Coding OR Aptitude)",
+        "Don't spend >2 min on any MCQ - mark and move",
+        "Write clean code with comments",
+        "Partial credit is given - submit working code",
+        "Stay calm, trust your preparation"
+      ]
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-2xl p-8 mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Accenture OA Prep Plan</h1>
+              <p className="text-blue-100 text-lg">Advanced Application Engineer • 5.5 Weeks</p>
+            </div>
+            <div className="text-right">
+              <div className="text-sm text-blue-100">Exam Date</div>
+              <div className="text-3xl font-bold">Jan 12, 2025</div>
+              <div className="text-sm text-blue-100 mt-1">38 Days Left</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Week Navigation */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          {weeks.map((week, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveWeek(index)}
+              className={`px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-all ${
+                activeWeek === index
+                  ? 'bg-blue-600 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Week {index + 1}
+            </button>
+          ))}
+        </div>
+
+        {/* Active Week Content */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+          <div className="border-b pb-4 mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">{weeks[activeWeek].title}</h2>
+            <div className="flex gap-4 mt-2 text-sm">
+              <span className="text-gray-600 flex items-center gap-1">
+                <Calendar size={16} /> {weeks[activeWeek].dates}
+              </span>
+              <span className="text-purple-600 flex items-center gap-1">
+                <Target size={16} /> {weeks[activeWeek].focus}
+              </span>
+            </div>
+          </div>
+
+          {weeks[activeWeek].days.map((dayGroup, dayIndex) => (
+            <div key={dayIndex} className="mb-8 last:mb-0">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 mb-4">
+                <h3 className="text-xl font-bold text-gray-800">{dayGroup.day}</h3>
+                <p className="text-gray-600 text-sm mt-1">{dayGroup.title}</p>
+              </div>
+
+              <div className="space-y-3 ml-4">
+                {dayGroup.tasks.map((task, taskIndex) => {
+                  const Icon = task.icon;
+                  const isCompleted = completedTasks[`${activeWeek}-${dayIndex}-${taskIndex}`];
+                  
+                  return (
+                    <div
+                      key={taskIndex}
+                      onClick={() => toggleTask(activeWeek, dayIndex, taskIndex)}
+                      className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all ${
+                        isCompleted
+                          ? 'bg-green-50 border-2 border-green-300'
+                          : 'bg-white border-2 border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="mt-1">
+                        {isCompleted ? (
+                          <CheckCircle className="text-green-600" size={24} />
+                        ) : (
+                          <Circle className="text-gray-400" size={24} />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2 flex-1">
+                            <Icon className={isCompleted ? 'text-green-600' : 'text-blue-600'} size={20} />
+                            <span className={`${isCompleted ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                              {task.text}
+                            </span>
+                          </div>
+                          <span className="flex items-center gap-1 text-sm text-gray-500 whitespace-nowrap">
+                            <Clock size={14} />
+                            {task.time}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Must-Solve Problems */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Star className="text-yellow-500" />
+            Top 15 Must-Solve Problems
+          </h2>
+          <div className="grid md:grid-cols-2 gap-3">
+            {mustSolveProblems.map((problem, index) => (
+              <div key={index} className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <span className="font-bold text-yellow-700 min-w-6">{index + 1}.</span>
+                <span className="text-gray-700">{problem}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Resources */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <BookOpen className="text-green-600" />
+              Free Resources
+            </h3>
+            <div className="space-y-3">
+              {resources.free.map((resource, index) => (
+                <div key={index} className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="font-semibold text-gray-800">{resource.name}</div>
+                  <div className="text-sm text-gray-600">{resource.use}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <Star className="text-purple-600" />
+              Paid (Optional)
+            </h3>
+            <div className="space-y-3">
+              {resources.paid.map((resource, index) => (
+                <div key={index} className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="font-semibold text-gray-800">{resource.name}</div>
+                  <div className="text-sm text-gray-600">{resource.use}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Exam Day Strategy */}
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl shadow-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <AlertCircle className="text-red-600" />
+            Exam Day Strategy (Jan 12)
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            {examDayStrategy.map((section, index) => (
+              <div key={index} className="bg-white rounded-lg p-5 border-2 border-orange-200">
+                <h3 className="font-bold text-lg text-gray-800 mb-3">{section.phase}</h3>
+                <ul className="space-y-2">
+                  {section.tips.map((tip, tipIndex) => (
+                    <li key={tipIndex} className="flex items-start gap-2 text-gray-700 text-sm">
+                      <span className="text-orange-500 font-bold">•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border-2 border-green-300">
+            <p className="text-xl font-bold text-gray-800 mb-2">
+              🎯 Stay Consistent • Trust Your Preparation • You've Got This!
+            </p>
+            <p className="text-gray-600">
+              3-4 hours daily practice for 38 days = 110+ hours of focused preparation
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AccentureOAPlan;
