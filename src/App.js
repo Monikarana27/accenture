@@ -19,9 +19,10 @@ const AccentureOAPlan = () => {
   };
 
   const toggleProblem = (problemIndex) => {
+    const key = `${activeTrackerTab}-${problemIndex}`;
     setSolvedProblems(prev => ({
       ...prev,
-      [problemIndex]: !prev[problemIndex]
+      [key]: !prev[key]
     }));
   };
 
@@ -482,14 +483,14 @@ const AccentureOAPlan = () => {
             </button>
           ))}
           <button
-            onClick={() => setShowProblemTracker(!showProblemTracker)}
+            onClick={() => setShowProblemTracker(true)}
             className={`px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-all ${
               showProblemTracker
                 ? 'bg-green-600 text-white shadow-lg scale-105'
                 : 'bg-white text-gray-700 hover:bg-gray-50'
             }`}
           >
-            📊 Array Tracker
+            📊 Problem Tracker
           </button>
         </div>
 
@@ -582,10 +583,45 @@ const AccentureOAPlan = () => {
           ))}
         </div>
         ) : (
-          /* Array Problems Tracker */
+          /* Problem Tracker */
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            {/* Tracker Category Tabs */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b-2">
+              {[
+                { key: 'arrays', label: '📊 Arrays', count: 26 },
+                { key: 'strings', label: '📝 Strings', count: 12 },
+                { key: 'numbers', label: '🔢 Numbers', count: 10 },
+                { key: 'patterns', label: '⭐ Patterns', count: 8 },
+                { key: 'algorithms', label: '⚙️ Algorithms', count: 9 },
+                { key: 'dataStructures', label: '🏗️ Data Structures', count: 8 }
+              ].map(tab => {
+                const solved = getSolvedCount(tab.key);
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      setActiveTrackerTab(tab.key);
+                      setDifficultyFilter('All');
+                    }}
+                    className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${
+                      activeTrackerTab === tab.key
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className="ml-2 text-xs opacity-75">
+                      {solved}/{tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="border-b pb-4 mb-6">
-              <h2 className="text-3xl font-bold text-gray-800">Array Problems Tracker</h2>
+              <h2 className="text-3xl font-bold text-gray-800 capitalize">
+                {activeTrackerTab === 'dataStructures' ? 'Data Structures' : activeTrackerTab} Problems
+              </h2>
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
                   <div 
@@ -594,7 +630,7 @@ const AccentureOAPlan = () => {
                   />
                 </div>
                 <span className="text-2xl font-bold text-green-600">
-                  {solvedCount}/{arrayProblems.length}
+                  {solvedCount}/{currentProblems.length}
                 </span>
               </div>
               <p className="text-gray-600 mt-2">{progressPercentage}% Complete</p>
@@ -604,8 +640,8 @@ const AccentureOAPlan = () => {
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
               {['All', 'Easy', 'Medium', 'Hard'].map(filter => {
                 const count = filter === 'All' 
-                  ? arrayProblems.length 
-                  : arrayProblems.filter(p => p.difficulty === filter).length;
+                  ? currentProblems.length 
+                  : currentProblems.filter(p => p.difficulty === filter).length;
                 const colors = {
                   All: 'bg-blue-100 text-blue-700',
                   Easy: 'bg-green-100 text-green-700',
@@ -632,8 +668,8 @@ const AccentureOAPlan = () => {
             {/* Problems List */}
             <div className="space-y-3">
               {filteredProblems.map((problem, originalIndex) => {
-                const index = arrayProblems.findIndex(p => p.id === problem.id);
-                const isSolved = solvedProblems[index];
+                const index = currentProblems.findIndex(p => p.id === problem.id);
+                const isSolved = solvedProblems[`${activeTrackerTab}-${index}`];
                 const difficultyColors = {
                   Easy: 'bg-green-100 text-green-700 border-green-300',
                   Medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
