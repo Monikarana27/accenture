@@ -8,6 +8,7 @@ const AccentureOAPlan = () => {
   const [showProblemTracker, setShowProblemTracker] = useState(false);
   const [solvedProblems, setSolvedProblems] = useState({});
   const [difficultyFilter, setDifficultyFilter] = useState('All');
+  const [activeTrackerTab, setActiveTrackerTab] = useState('arrays');
 
   const toggleTask = (weekIndex, dayIndex, taskIndex) => {
     const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
@@ -60,12 +61,91 @@ const AccentureOAPlan = () => {
     { id: 26, name: "Trapping Rain Water", difficulty: "Hard", category: "Two Pointer" }
   ];
 
-  const filteredProblems = difficultyFilter === 'All' 
-    ? arrayProblems 
-    : arrayProblems.filter(p => p.difficulty === difficultyFilter);
+  const stringProblems = [
+    { id: 1, name: "Reverse a string", difficulty: "Easy", category: "Basic Operations" },
+    { id: 2, name: "Reverse words in a sentence", difficulty: "Easy", category: "String Manipulation" },
+    { id: 3, name: "Check if string is palindrome", difficulty: "Easy", category: "Pattern Matching" },
+    { id: 4, name: "Check if two strings are anagrams", difficulty: "Easy", category: "Hashing" },
+    { id: 5, name: "Count frequency of each character", difficulty: "Easy", category: "Hashing" },
+    { id: 6, name: "Remove duplicates from string", difficulty: "Easy", category: "String Manipulation" },
+    { id: 7, name: "Find first non-repeating character", difficulty: "Easy", category: "Hashing" },
+    { id: 8, name: "String compression (aaabbccc → a3b2c3)", difficulty: "Medium", category: "String Manipulation" },
+    { id: 9, name: "Longest substring without repeating characters", difficulty: "Medium", category: "Sliding Window" },
+    { id: 10, name: "Check if string is valid shuffle of two strings", difficulty: "Medium", category: "Pattern Matching" },
+    { id: 11, name: "String rotation check", difficulty: "Easy", category: "Pattern Matching" },
+    { id: 12, name: "Remove all vowels from string", difficulty: "Easy", category: "String Manipulation" }
+  ];
 
-  const solvedCount = Object.values(solvedProblems).filter(Boolean).length;
-  const progressPercentage = Math.round((solvedCount / arrayProblems.length) * 100);
+  const numberProblems = [
+    { id: 1, name: "Check if number is prime", difficulty: "Easy", category: "Number Theory" },
+    { id: 2, name: "Find all prime numbers in a range", difficulty: "Easy", category: "Number Theory" },
+    { id: 3, name: "Check if number is Armstrong number", difficulty: "Easy", category: "Mathematical" },
+    { id: 4, name: "Check if number is palindrome", difficulty: "Easy", category: "Mathematical" },
+    { id: 5, name: "Find factorial of a number", difficulty: "Easy", category: "Mathematical" },
+    { id: 6, name: "Fibonacci series (first n terms)", difficulty: "Easy", category: "Sequences" },
+    { id: 7, name: "Find GCD/HCF of two numbers", difficulty: "Easy", category: "Number Theory" },
+    { id: 8, name: "Find LCM of two numbers", difficulty: "Easy", category: "Number Theory" },
+    { id: 9, name: "Sum of digits until single digit", difficulty: "Easy", category: "Mathematical" },
+    { id: 10, name: "Reverse a number", difficulty: "Easy", category: "Mathematical" }
+  ];
+
+  const patternProblems = [
+    { id: 1, name: "Right triangle star pattern", difficulty: "Easy", category: "Basic Patterns" },
+    { id: 2, name: "Pyramid star pattern", difficulty: "Easy", category: "Basic Patterns" },
+    { id: 3, name: "Diamond star pattern", difficulty: "Medium", category: "Advanced Patterns" },
+    { id: 4, name: "Number triangle (1, 12, 123...)", difficulty: "Easy", category: "Number Patterns" },
+    { id: 5, name: "Alphabet patterns (A, AB, ABC...)", difficulty: "Easy", category: "Alphabet Patterns" },
+    { id: 6, name: "Inverted pyramid pattern", difficulty: "Easy", category: "Basic Patterns" },
+    { id: 7, name: "Pascal's triangle", difficulty: "Medium", category: "Advanced Patterns" },
+    { id: 8, name: "Hollow square pattern", difficulty: "Medium", category: "Advanced Patterns" }
+  ];
+
+  const algorithmProblems = [
+    { id: 1, name: "Bubble Sort implementation", difficulty: "Easy", category: "Sorting" },
+    { id: 2, name: "Selection Sort implementation", difficulty: "Easy", category: "Sorting" },
+    { id: 3, name: "Insertion Sort implementation", difficulty: "Easy", category: "Sorting" },
+    { id: 4, name: "Linear Search", difficulty: "Easy", category: "Searching" },
+    { id: 5, name: "Binary Search", difficulty: "Easy", category: "Searching" },
+    { id: 6, name: "Factorial using recursion", difficulty: "Easy", category: "Recursion" },
+    { id: 7, name: "Fibonacci using recursion", difficulty: "Easy", category: "Recursion" },
+    { id: 8, name: "Tower of Hanoi (concept)", difficulty: "Medium", category: "Recursion" },
+    { id: 9, name: "Two-pointer technique problems", difficulty: "Medium", category: "Two Pointer" }
+  ];
+
+  const dataStructureProblems = [
+    { id: 1, name: "Reverse a linked list", difficulty: "Medium", category: "Linked List" },
+    { id: 2, name: "Find middle element of linked list", difficulty: "Easy", category: "Linked List" },
+    { id: 3, name: "Balanced parentheses using stack", difficulty: "Medium", category: "Stack" },
+    { id: 4, name: "Reverse string using stack", difficulty: "Easy", category: "Stack" },
+    { id: 5, name: "Reverse a queue", difficulty: "Easy", category: "Queue" },
+    { id: 6, name: "Implement queue using stacks", difficulty: "Medium", category: "Queue" },
+    { id: 7, name: "Count frequency using HashMap", difficulty: "Easy", category: "HashMap" },
+    { id: 8, name: "Find duplicates using HashMap", difficulty: "Easy", category: "HashMap" }
+  ];
+
+  const allProblemSets = {
+    arrays: arrayProblems,
+    strings: stringProblems,
+    numbers: numberProblems,
+    patterns: patternProblems,
+    algorithms: algorithmProblems,
+    dataStructures: dataStructureProblems
+  };
+
+  const currentProblems = allProblemSets[activeTrackerTab];
+  const filteredProblems = difficultyFilter === 'All' 
+    ? currentProblems 
+    : currentProblems.filter(p => p.difficulty === difficultyFilter);
+
+  const getSolvedCount = (category) => {
+    const problems = allProblemSets[category];
+    return problems.filter((_, index) => 
+      solvedProblems[`${category}-${index}`]
+    ).length;
+  };
+
+  const solvedCount = getSolvedCount(activeTrackerTab);
+  const progressPercentage = Math.round((solvedCount / currentProblems.length) * 100);
 
   const weeks = [
     {
