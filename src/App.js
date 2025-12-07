@@ -1,14 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, Circle, Calendar, Code, Brain, BookOpen, Target, Clock, Star, AlertCircle } from 'lucide-react';
 
 const AccentureOAPlan = () => {
-  const [completedTasks, setCompletedTasks] = useState({});
+  // Load initial state from localStorage
+  const [completedTasks, setCompletedTasks] = useState(() => {
+    const saved = localStorage.getItem('accenture-completed-tasks');
+    return saved ? JSON.parse(saved) : {};
+  });
+  
   const [activeWeek, setActiveWeek] = useState(0);
-  const [weekNotes, setWeekNotes] = useState({});
+  
+  const [weekNotes, setWeekNotes] = useState(() => {
+    const saved = localStorage.getItem('accenture-week-notes');
+    return saved ? JSON.parse(saved) : {};
+  });
+  
   const [showProblemTracker, setShowProblemTracker] = useState(false);
-  const [solvedProblems, setSolvedProblems] = useState({});
+  
+  const [solvedProblems, setSolvedProblems] = useState(() => {
+    const saved = localStorage.getItem('accenture-solved-problems');
+    return saved ? JSON.parse(saved) : {};
+  });
+  
   const [difficultyFilter, setDifficultyFilter] = useState('All');
   const [activeTrackerTab, setActiveTrackerTab] = useState('arrays');
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem('accenture-completed-tasks', JSON.stringify(completedTasks));
+  }, [completedTasks]);
+
+  useEffect(() => {
+    localStorage.setItem('accenture-week-notes', JSON.stringify(weekNotes));
+  }, [weekNotes]);
+
+  useEffect(() => {
+    localStorage.setItem('accenture-solved-problems', JSON.stringify(solvedProblems));
+  }, [solvedProblems]);
 
   const toggleTask = (weekIndex, dayIndex, taskIndex) => {
     const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
@@ -451,7 +479,7 @@ const AccentureOAPlan = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-2xl p-8 mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-4xl font-bold mb-2">Accenture OA Prep Plan</h1>
               <p className="text-blue-100 text-lg">Advanced Application Engineer • 5.5 Weeks</p>
@@ -462,6 +490,22 @@ const AccentureOAPlan = () => {
               <div className="text-sm text-blue-100 mt-1">38 Days Left</div>
             </div>
           </div>
+          
+          {/* Reset Button */}
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                localStorage.clear();
+                setCompletedTasks({});
+                setWeekNotes({});
+                setSolvedProblems({});
+                alert('All progress has been reset!');
+              }
+            }}
+            className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all"
+          >
+            🔄 Reset All Progress
+          </button>
         </div>
 
         {/* Week Navigation */}
