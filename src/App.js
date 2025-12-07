@@ -5,6 +5,9 @@ const AccentureOAPlan = () => {
   const [completedTasks, setCompletedTasks] = useState({});
   const [activeWeek, setActiveWeek] = useState(0);
   const [weekNotes, setWeekNotes] = useState({});
+  const [showProblemTracker, setShowProblemTracker] = useState(false);
+  const [solvedProblems, setSolvedProblems] = useState({});
+  const [difficultyFilter, setDifficultyFilter] = useState('All');
 
   const toggleTask = (weekIndex, dayIndex, taskIndex) => {
     const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
@@ -14,12 +17,55 @@ const AccentureOAPlan = () => {
     }));
   };
 
+  const toggleProblem = (problemIndex) => {
+    setSolvedProblems(prev => ({
+      ...prev,
+      [problemIndex]: !prev[problemIndex]
+    }));
+  };
+
   const updateWeekNotes = (weekIndex, notes) => {
     setWeekNotes(prev => ({
       ...prev,
       [weekIndex]: notes
     }));
   };
+
+  const arrayProblems = [
+    { id: 1, name: "Reverse an array", difficulty: "Easy", category: "Basic Operations" },
+    { id: 2, name: "Find maximum and minimum element", difficulty: "Easy", category: "Basic Operations" },
+    { id: 3, name: "Find Kth max and min element", difficulty: "Medium", category: "Searching" },
+    { id: 4, name: "Move all negative elements to one side", difficulty: "Easy", category: "Two Pointer" },
+    { id: 5, name: "Union of two arrays", difficulty: "Easy", category: "Set Operations" },
+    { id: 6, name: "Intersection of two arrays", difficulty: "Easy", category: "Set Operations" },
+    { id: 7, name: "Cyclically rotate array by one", difficulty: "Easy", category: "Rotation" },
+    { id: 8, name: "Kadane's Algorithm (max sum subarray)", difficulty: "Medium", category: "Dynamic Programming" },
+    { id: 9, name: "Minimize maximum difference between heights", difficulty: "Medium", category: "Greedy" },
+    { id: 10, name: "Minimum jumps to reach end", difficulty: "Medium", category: "Greedy" },
+    { id: 11, name: "Find duplicates in array", difficulty: "Easy", category: "Hashing" },
+    { id: 12, name: "Merge two sorted arrays without extra space", difficulty: "Hard", category: "Two Pointer" },
+    { id: 13, name: "Best Time to Buy and Sell Stock", difficulty: "Easy", category: "Greedy" },
+    { id: 14, name: "Count pairs with given sum", difficulty: "Easy", category: "Hashing" },
+    { id: 15, name: "Common elements in 3 sorted arrays", difficulty: "Medium", category: "Three Pointer" },
+    { id: 16, name: "First repeating element", difficulty: "Easy", category: "Hashing" },
+    { id: 17, name: "First non-repeating element", difficulty: "Easy", category: "Hashing" },
+    { id: 18, name: "Subarray with given sum", difficulty: "Easy", category: "Sliding Window" },
+    { id: 19, name: "Factorial of large number", difficulty: "Medium", category: "Math" },
+    { id: 20, name: "Longest consecutive subsequence", difficulty: "Medium", category: "Hashing" },
+    { id: 21, name: "Minimum in rotated sorted array", difficulty: "Medium", category: "Binary Search" },
+    { id: 22, name: "Elements appearing more than n/k times", difficulty: "Medium", category: "Hashing" },
+    { id: 23, name: "Max profit with at most 2 transactions", difficulty: "Hard", category: "Dynamic Programming" },
+    { id: 24, name: "Array is subset of another array", difficulty: "Easy", category: "Hashing" },
+    { id: 25, name: "Triplet sum to given value", difficulty: "Medium", category: "Two Pointer" },
+    { id: 26, name: "Trapping Rain Water", difficulty: "Hard", category: "Two Pointer" }
+  ];
+
+  const filteredProblems = difficultyFilter === 'All' 
+    ? arrayProblems 
+    : arrayProblems.filter(p => p.difficulty === difficultyFilter);
+
+  const solvedCount = Object.values(solvedProblems).filter(Boolean).length;
+  const progressPercentage = Math.round((solvedCount / arrayProblems.length) * 100);
 
   const weeks = [
     {
@@ -41,7 +87,9 @@ const AccentureOAPlan = () => {
           day: "Days 3-7",
           title: "Core Foundations",
           tasks: [
-            { icon: Code, text: "Array basics: rotation, max/min, duplicates (2-3 problems daily)", time: "2 hrs" },
+            { icon: Code, text: "Array basics Day 1-2: Reverse, max/min, Kth element, rotation (2-3 problems)", time: "2 hrs" },
+            { icon: Code, text: "Array basics Day 3-4: Union/intersection, duplicates, move negatives (2-3 problems)", time: "2 hrs" },
+            { icon: Code, text: "Array basics Day 5-7: Kadane's algorithm, pairs with sum, subarray sum (2-3 problems)", time: "2 hrs" },
             { icon: Code, text: "String basics: reverse, palindrome, anagram (2-3 problems daily)", time: "1 hr" },
             { icon: Brain, text: "Aptitude: Percentages, Ratios, Time-Work (IndiaBix)", time: "1 hr" },
             { icon: Brain, text: "Logical: Patterns, sequences, blood relations (10-15 Qs)", time: "30 min" },
@@ -68,10 +116,10 @@ const AccentureOAPlan = () => {
           day: "Daily Routine",
           title: "Core Practice",
           tasks: [
-            { icon: Code, text: "Arrays: Binary search, two-pointer, sliding window", time: "1 hr" },
-            { icon: Code, text: "Strings: Substring problems, pattern matching", time: "1 hr" },
-            { icon: Code, text: "Math: Prime, Armstrong, GCD/LCM, Fibonacci", time: "45 min" },
-            { icon: Code, text: "Sorting: Bubble, Selection, Insertion (understand logic)", time: "30 min" },
+            { icon: Code, text: "Arrays: Binary search, two-pointer, sliding window, longest consecutive sequence", time: "1.5 hrs" },
+            { icon: Code, text: "Strings: Substring problems, pattern matching, longest palindrome", time: "1 hr" },
+            { icon: Code, text: "Math: Prime, Armstrong, GCD/LCM, Fibonacci, factorial of large numbers", time: "45 min" },
+            { icon: Code, text: "Sorting: Bubble, Selection, Insertion (understand + implement)", time: "30 min" },
             { icon: Brain, text: "Aptitude speed drills (aim 45-60 sec per question)", time: "45 min" },
             { icon: Brain, text: "Logical: Syllogisms, coding-decoding", time: "30 min" },
             { icon: BookOpen, text: "Verbal: Sentence correction + 2-3 passages", time: "20 min" }
@@ -243,21 +291,22 @@ const AccentureOAPlan = () => {
   ];
 
   const mustSolveProblems = [
+    "Reverse an array & rotate by K positions",
+    "Find max/min and Kth largest/smallest element",
     "Second largest element in array",
-    "Sum of array elements with divisibility conditions",
+    "Find duplicates & first repeating/non-repeating element",
+    "Sum of array elements / subarray with given sum",
+    "Count pairs with given sum / triplet sum",
+    "Kadane's Algorithm (max sum contiguous subarray)",
+    "Union and intersection of two arrays",
+    "Merge two sorted arrays without extra space",
+    "Move all negative elements to one side",
     "Reverse words in a string",
     "Check if two strings are anagrams",
-    "Count frequency of each character",
-    "Find kth largest/smallest element",
-    "Rotate array left/right by K positions",
-    "Find pairs with given sum",
-    "Merge two sorted arrays",
+    "Count frequency of each character (HashMap)",
     "Check palindrome (ignore spaces/special chars)",
     "Pattern printing (stars, numbers, pyramids)",
-    "Prime number check",
-    "Armstrong number check",
-    "Fibonacci series",
-    "GCD and LCM"
+    "Prime, Armstrong, Fibonacci, GCD/LCM"
   ];
 
   const resources = {
@@ -339,9 +388,12 @@ const AccentureOAPlan = () => {
           {weeks.map((week, index) => (
             <button
               key={index}
-              onClick={() => setActiveWeek(index)}
+              onClick={() => {
+                setActiveWeek(index);
+                setShowProblemTracker(false);
+              }}
               className={`px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-all ${
-                activeWeek === index
+                activeWeek === index && !showProblemTracker
                   ? 'bg-blue-600 text-white shadow-lg scale-105'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
               }`}
@@ -349,9 +401,20 @@ const AccentureOAPlan = () => {
               Week {index + 1}
             </button>
           ))}
+          <button
+            onClick={() => setShowProblemTracker(!showProblemTracker)}
+            className={`px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-all ${
+              showProblemTracker
+                ? 'bg-green-600 text-white shadow-lg scale-105'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            📊 Array Tracker
+          </button>
         </div>
 
-        {/* Active Week Content */}
+        {/* Active Week Content or Problem Tracker */}
+        {!showProblemTracker ? (
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <div className="border-b pb-4 mb-6">
             <h2 className="text-3xl font-bold text-gray-800">{weeks[activeWeek].title}</h2>
@@ -438,12 +501,112 @@ const AccentureOAPlan = () => {
             </div>
           ))}
         </div>
+        ) : (
+          /* Array Problems Tracker */
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div className="border-b pb-4 mb-6">
+              <h2 className="text-3xl font-bold text-gray-800">Array Problems Tracker</h2>
+              <div className="flex items-center gap-4 mt-4">
+                <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-full transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                <span className="text-2xl font-bold text-green-600">
+                  {solvedCount}/{arrayProblems.length}
+                </span>
+              </div>
+              <p className="text-gray-600 mt-2">{progressPercentage}% Complete</p>
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+              {['All', 'Easy', 'Medium', 'Hard'].map(filter => {
+                const count = filter === 'All' 
+                  ? arrayProblems.length 
+                  : arrayProblems.filter(p => p.difficulty === filter).length;
+                const colors = {
+                  All: 'bg-blue-100 text-blue-700',
+                  Easy: 'bg-green-100 text-green-700',
+                  Medium: 'bg-yellow-100 text-yellow-700',
+                  Hard: 'bg-red-100 text-red-700'
+                };
+                
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => setDifficultyFilter(filter)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                      difficultyFilter === filter 
+                        ? colors[filter] + ' ring-2 ring-offset-2' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {filter} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Problems List */}
+            <div className="space-y-3">
+              {filteredProblems.map((problem, originalIndex) => {
+                const index = arrayProblems.findIndex(p => p.id === problem.id);
+                const isSolved = solvedProblems[index];
+                const difficultyColors = {
+                  Easy: 'bg-green-100 text-green-700 border-green-300',
+                  Medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+                  Hard: 'bg-red-100 text-red-700 border-red-300'
+                };
+
+                return (
+                  <div
+                    key={problem.id}
+                    onClick={() => toggleProblem(index)}
+                    className={`flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all border-2 ${
+                      isSolved
+                        ? 'bg-green-50 border-green-300'
+                        : 'bg-white border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div>
+                      {isSolved ? (
+                        <CheckCircle className="text-green-600" size={24} />
+                      ) : (
+                        <Circle className="text-gray-400" size={24} />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-sm font-mono ${isSolved ? 'text-gray-500' : 'text-gray-600'}`}>
+                          #{problem.id}
+                        </span>
+                        <span className={`font-medium ${isSolved ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                          {problem.name}
+                        </span>
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <span className={`text-xs px-2 py-1 rounded border ${difficultyColors[problem.difficulty]}`}>
+                          {problem.difficulty}
+                        </span>
+                        <span className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                          {problem.category}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Must-Solve Problems */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Star className="text-yellow-500" />
-            Top 15 Must-Solve Problems
+            Top 16 Must-Solve Problems
           </h2>
           <div className="grid md:grid-cols-2 gap-3">
             {mustSolveProblems.map((problem, index) => (
