@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Circle, Calendar, Code, Brain, BookOpen, Target, Clock, Star, AlertCircle } from 'lucide-react';
 
-const AccentureOAPlan = () => {
+const OAPlan = () => {
   // Load initial state from localStorage
   const [completedTasks, setCompletedTasks] = useState(() => {
     const saved = localStorage.getItem('accenture-completed-tasks');
@@ -22,6 +22,11 @@ const AccentureOAPlan = () => {
     return saved ? JSON.parse(saved) : {};
   });
   
+  const [startDate] = useState(() => {
+    const saved = localStorage.getItem('accenture-start-date');
+    return saved ? saved : new Date().toISOString();
+  });
+  
   const [difficultyFilter, setDifficultyFilter] = useState('All');
   const [activeTrackerTab, setActiveTrackerTab] = useState('arrays');
 
@@ -37,6 +42,10 @@ const AccentureOAPlan = () => {
   useEffect(() => {
     localStorage.setItem('accenture-solved-problems', JSON.stringify(solvedProblems));
   }, [solvedProblems]);
+
+  useEffect(() => {
+    localStorage.setItem('accenture-start-date', startDate);
+  }, [startDate]);
 
   const toggleTask = (weekIndex, dayIndex, taskIndex) => {
     const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
@@ -175,6 +184,25 @@ const AccentureOAPlan = () => {
 
   const solvedCount = getSolvedCount(activeTrackerTab);
   const progressPercentage = Math.round((solvedCount / currentProblems.length) * 100);
+
+  // Calculate overall progress
+  const calculateOverallProgress = () => {
+    let totalProblems = 0;
+    let totalSolved = 0;
+    Object.keys(allProblemSets).forEach(category => {
+      const problems = allProblemSets[category];
+      totalProblems += problems.length;
+      totalSolved += getSolvedCount(category);
+    });
+    return { totalSolved, totalProblems, percentage: Math.round((totalSolved / totalProblems) * 100) };
+  };
+
+  const overallProgress = calculateOverallProgress();
+
+  // Calculate days left
+  const examDate = new Date('2025-01-12');
+  const today = new Date();
+  const daysLeft = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
 
   const weeks = [
     {
@@ -426,10 +454,6 @@ const AccentureOAPlan = () => {
       { name: "IndiaBix", use: "Aptitude + Logical + Verbal" },
       { name: "PrepInsta (Free)", use: "Accenture-specific mocks" },
       { name: "W3Schools", use: "SQL practice" }
-    ],
-    paid: [
-      { name: "PrepInsta Prime", use: "₹199/month - Best Accenture mocks" },
-      { name: "HackerRank Premium", use: "More practice problems (optional)" }
     ]
   };
 
@@ -481,13 +505,13 @@ const AccentureOAPlan = () => {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-2xl p-8 mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Accenture OA Prep Plan</h1>
+              <h1 className="text-4xl font-bold mb-2">OA Prep Plan</h1>
               <p className="text-blue-100 text-lg">Advanced Application Engineer • 5.5 Weeks</p>
             </div>
             <div className="text-right">
               <div className="text-sm text-blue-100">Exam Date</div>
               <div className="text-3xl font-bold">Jan 12, 2025</div>
-              <div className="text-sm text-blue-100 mt-1">38 Days Left</div>
+              <div className="text-sm text-blue-100 mt-1"><span className="font-bold text-xl">{daysLeft}</span> Days Left</div>
             </div>
           </div>
           
@@ -499,7 +523,7 @@ const AccentureOAPlan = () => {
                 setCompletedTasks({});
                 setWeekNotes({});
                 setSolvedProblems({});
-                alert('All progress has been reset!');
+                window.location.reload();
               }
             }}
             className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all"
@@ -562,12 +586,7 @@ const AccentureOAPlan = () => {
             <textarea
               value={weekNotes[activeWeek] || ''}
               onChange={(e) => updateWeekNotes(activeWeek, e.target.value)}
-              placeholder="Add your notes here:
-• What went well this week?
-• Which topics need more practice?
-• Key patterns or concepts learned
-• Mistakes to avoid
-• Mock test scores and insights"
+              placeholder="Add your notes here: • What went well this week? • Which topics need more practice? • Key patterns or concepts learned • Mistakes to avoid • Mock test scores and insights"
               className="w-full h-32 p-4 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none resize-none text-gray-700 placeholder-gray-400"
             />
             <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
@@ -582,7 +601,7 @@ const AccentureOAPlan = () => {
                 <h3 className="text-xl font-bold text-gray-800">{dayGroup.day}</h3>
                 <p className="text-gray-600 text-sm mt-1">{dayGroup.title}</p>
               </div>
-
+              
               <div className="space-y-3 ml-4">
                 {dayGroup.tasks.map((task, taskIndex) => {
                   const Icon = task.icon;
@@ -625,229 +644,4 @@ const AccentureOAPlan = () => {
               </div>
             </div>
           ))}
-        </div>
-        ) : (
-          /* Problem Tracker */
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-            {/* Tracker Category Tabs */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b-2">
-              {[
-                { key: 'arrays', label: '📊 Arrays', count: 26 },
-                { key: 'strings', label: '📝 Strings', count: 12 },
-                { key: 'numbers', label: '🔢 Numbers', count: 10 },
-                { key: 'patterns', label: '⭐ Patterns', count: 8 },
-                { key: 'algorithms', label: '⚙️ Algorithms', count: 9 },
-                { key: 'dataStructures', label: '🏗️ Data Structures', count: 8 }
-              ].map(tab => {
-                const solved = getSolvedCount(tab.key);
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => {
-                      setActiveTrackerTab(tab.key);
-                      setDifficultyFilter('All');
-                    }}
-                    className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${
-                      activeTrackerTab === tab.key
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {tab.label}
-                    <span className="ml-2 text-xs opacity-75">
-                      {solved}/{tab.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="border-b pb-4 mb-6">
-              <h2 className="text-3xl font-bold text-gray-800 capitalize">
-                {activeTrackerTab === 'dataStructures' ? 'Data Structures' : activeTrackerTab} Problems
-              </h2>
-              <div className="flex items-center gap-4 mt-4">
-                <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
-                  <div 
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-full transition-all duration-500"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-                <span className="text-2xl font-bold text-green-600">
-                  {solvedCount}/{currentProblems.length}
-                </span>
-              </div>
-              <p className="text-gray-600 mt-2">{progressPercentage}% Complete</p>
-            </div>
-
-            {/* Filter buttons */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-              {['All', 'Easy', 'Medium', 'Hard'].map(filter => {
-                const count = filter === 'All' 
-                  ? currentProblems.length 
-                  : currentProblems.filter(p => p.difficulty === filter).length;
-                const colors = {
-                  All: 'bg-blue-100 text-blue-700',
-                  Easy: 'bg-green-100 text-green-700',
-                  Medium: 'bg-yellow-100 text-yellow-700',
-                  Hard: 'bg-red-100 text-red-700'
-                };
-                
-                return (
-                  <button
-                    key={filter}
-                    onClick={() => setDifficultyFilter(filter)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                      difficultyFilter === filter 
-                        ? colors[filter] + ' ring-2 ring-offset-2' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {filter} ({count})
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Problems List */}
-            <div className="space-y-3">
-              {filteredProblems.map((problem, originalIndex) => {
-                const index = currentProblems.findIndex(p => p.id === problem.id);
-                const isSolved = solvedProblems[`${activeTrackerTab}-${index}`];
-                const difficultyColors = {
-                  Easy: 'bg-green-100 text-green-700 border-green-300',
-                  Medium: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-                  Hard: 'bg-red-100 text-red-700 border-red-300'
-                };
-
-                return (
-                  <div
-                    key={problem.id}
-                    onClick={() => toggleProblem(index)}
-                    className={`flex items-center gap-4 p-4 rounded-lg cursor-pointer transition-all border-2 ${
-                      isSolved
-                        ? 'bg-green-50 border-green-300'
-                        : 'bg-white border-gray-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <div>
-                      {isSolved ? (
-                        <CheckCircle className="text-green-600" size={24} />
-                      ) : (
-                        <Circle className="text-gray-400" size={24} />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-sm font-mono ${isSolved ? 'text-gray-500' : 'text-gray-600'}`}>
-                          #{problem.id}
-                        </span>
-                        <span className={`font-medium ${isSolved ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                          {problem.name}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 mt-2">
-                        <span className={`text-xs px-2 py-1 rounded border ${difficultyColors[problem.difficulty]}`}>
-                          {problem.difficulty}
-                        </span>
-                        <span className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                          {problem.category}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Must-Solve Problems */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Star className="text-yellow-500" />
-            Top 16 Must-Solve Problems
-          </h2>
-          <div className="grid md:grid-cols-2 gap-3">
-            {mustSolveProblems.map((problem, index) => (
-              <div key={index} className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                <span className="font-bold text-yellow-700 min-w-6">{index + 1}.</span>
-                <span className="text-gray-700">{problem}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Resources */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <BookOpen className="text-green-600" />
-              Free Resources
-            </h3>
-            <div className="space-y-3">
-              {resources.free.map((resource, index) => (
-                <div key={index} className="p-3 bg-green-50 rounded-lg border border-green-200">
-                  <div className="font-semibold text-gray-800">{resource.name}</div>
-                  <div className="text-sm text-gray-600">{resource.use}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <Star className="text-purple-600" />
-              Paid (Optional)
-            </h3>
-            <div className="space-y-3">
-              {resources.paid.map((resource, index) => (
-                <div key={index} className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <div className="font-semibold text-gray-800">{resource.name}</div>
-                  <div className="text-sm text-gray-600">{resource.use}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Exam Day Strategy */}
-        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <AlertCircle className="text-red-600" />
-            Exam Day Strategy (Jan 12)
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {examDayStrategy.map((section, index) => (
-              <div key={index} className="bg-white rounded-lg p-5 border-2 border-orange-200">
-                <h3 className="font-bold text-lg text-gray-800 mb-3">{section.phase}</h3>
-                <ul className="space-y-2">
-                  {section.tips.map((tip, tipIndex) => (
-                    <li key={tipIndex} className="flex items-start gap-2 text-gray-700 text-sm">
-                      <span className="text-orange-500 font-bold">•</span>
-                      <span>{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border-2 border-green-300">
-            <p className="text-xl font-bold text-gray-800 mb-2">
-              🎯 Stay Consistent • Trust Your Preparation • You've Got This!
-            </p>
-            <p className="text-gray-600">
-              3-4 hours daily practice for 38 days = 110+ hours of focused preparation
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default AccentureOAPlan;
+        </div
