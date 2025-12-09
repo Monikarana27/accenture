@@ -2,50 +2,67 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, Circle, Calendar, Code, Brain, BookOpen, Target, Clock, Star, AlertCircle } from 'lucide-react';
 
 const OAPlan = () => {
-  // Load initial state from localStorage
-  const [completedTasks, setCompletedTasks] = useState(() => {
-    const saved = localStorage.getItem('accenture-completed-tasks');
-    return saved ? JSON.parse(saved) : {};
-  });
-  
+  const [completedTasks, setCompletedTasks] = useState({});
   const [activeWeek, setActiveWeek] = useState(0);
-  
-  const [weekNotes, setWeekNotes] = useState(() => {
-    const saved = localStorage.getItem('accenture-week-notes');
-    return saved ? JSON.parse(saved) : {};
-  });
-  
+  const [weekNotes, setWeekNotes] = useState({});
   const [showProblemTracker, setShowProblemTracker] = useState(false);
-  
-  const [solvedProblems, setSolvedProblems] = useState(() => {
-    const saved = localStorage.getItem('accenture-solved-problems');
-    return saved ? JSON.parse(saved) : {};
-  });
-  
-  const [startDate] = useState(() => {
-    const saved = localStorage.getItem('accenture-start-date');
-    return saved ? saved : new Date().toISOString();
-  });
-  
+  const [solvedProblems, setSolvedProblems] = useState({});
+  const [startDate, setStartDate] = useState(new Date().toISOString());
   const [difficultyFilter, setDifficultyFilter] = useState('All');
   const [activeTrackerTab, setActiveTrackerTab] = useState('arrays');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Save to localStorage whenever state changes
+  // Load data from storage on mount
   useEffect(() => {
-    localStorage.setItem('accenture-completed-tasks', JSON.stringify(completedTasks));
-  }, [completedTasks]);
+    const loadData = async () => {
+      try {
+        const [tasksResult, notesResult, problemsResult, dateResult] = await Promise.all([
+          window.storage.get('accenture-completed-tasks').catch(() => null),
+          window.storage.get('accenture-week-notes').catch(() => null),
+          window.storage.get('accenture-solved-problems').catch(() => null),
+          window.storage.get('accenture-start-date').catch(() => null)
+        ]);
 
-  useEffect(() => {
-    localStorage.setItem('accenture-week-notes', JSON.stringify(weekNotes));
-  }, [weekNotes]);
+        if (tasksResult?.value) setCompletedTasks(JSON.parse(tasksResult.value));
+        if (notesResult?.value) setWeekNotes(JSON.parse(notesResult.value));
+        if (problemsResult?.value) setSolvedProblems(JSON.parse(problemsResult.value));
+        if (dateResult?.value) setStartDate(dateResult.value);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
+  // Save completed tasks
   useEffect(() => {
-    localStorage.setItem('accenture-solved-problems', JSON.stringify(solvedProblems));
-  }, [solvedProblems]);
+    if (!isLoading) {
+      window.storage.set('accenture-completed-tasks', JSON.stringify(completedTasks)).catch(console.error);
+    }
+  }, [completedTasks, isLoading]);
 
+  // Save week notes
   useEffect(() => {
-    localStorage.setItem('accenture-start-date', startDate);
-  }, [startDate]);
+    if (!isLoading) {
+      window.storage.set('accenture-week-notes', JSON.stringify(weekNotes)).catch(console.error);
+    }
+  }, [weekNotes, isLoading]);
+
+  // Save solved problems
+  useEffect(() => {
+    if (!isLoading) {
+      window.storage.set('accenture-solved-problems', JSON.stringify(solvedProblems)).catch(console.error);
+    }
+  }, [solvedProblems, isLoading]);
+
+  // Save start date
+  useEffect(() => {
+    if (!isLoading) {
+      window.storage.set('accenture-start-date', startDate).catch(console.error);
+    }
+  }, [startDate, isLoading]);
 
   const toggleTask = (weekIndex, dayIndex, taskIndex) => {
     const key = `${weekIndex}-${dayIndex}-${taskIndex}`;
@@ -68,6 +85,25 @@ const OAPlan = () => {
       ...prev,
       [weekIndex]: notes
     }));
+  };
+
+  const resetAllProgress = async () => {
+    if (window.confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+      try {
+        await Promise.all([
+          window.storage.delete('accenture-completed-tasks').catch(() => null),
+          window.storage.delete('accenture-week-notes').catch(() => null),
+          window.storage.delete('accenture-solved-problems').catch(() => null),
+          window.storage.delete('accenture-start-date').catch(() => null)
+        ]);
+        setCompletedTasks({});
+        setWeekNotes({});
+        setSolvedProblems({});
+        setStartDate(new Date().toISOString());
+      } catch (error) {
+        console.error('Error resetting progress:', error);
+      }
+    }
   };
 
   const arrayProblems = [
@@ -185,7 +221,6 @@ const OAPlan = () => {
   const solvedCount = getSolvedCount(activeTrackerTab);
   const progressPercentage = Math.round((solvedCount / currentProblems.length) * 100);
 
-  // Calculate overall progress
   const calculateOverallProgress = () => {
     let totalProblems = 0;
     let totalSolved = 0;
@@ -199,7 +234,6 @@ const OAPlan = () => {
 
   const overallProgress = calculateOverallProgress();
 
-  // Calculate days left
   const examDate = new Date('2025-01-12');
   const today = new Date();
   const daysLeft = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
@@ -427,76 +461,16 @@ const OAPlan = () => {
     }
   ];
 
-  const mustSolveProblems = [
-    "Reverse an array & rotate by K positions",
-    "Find max/min and Kth largest/smallest element",
-    "Second largest element in array",
-    "Find duplicates & first repeating/non-repeating element",
-    "Sum of array elements / subarray with given sum",
-    "Count pairs with given sum / triplet sum",
-    "Kadane's Algorithm (max sum contiguous subarray)",
-    "Union and intersection of two arrays",
-    "Merge two sorted arrays without extra space",
-    "Move all negative elements to one side",
-    "Reverse words in a string",
-    "Check if two strings are anagrams",
-    "Count frequency of each character (HashMap)",
-    "Check palindrome (ignore spaces/special chars)",
-    "Pattern printing (stars, numbers, pyramids)",
-    "Prime, Armstrong, Fibonacci, GCD/LCM"
-  ];
-
-  const resources = {
-    free: [
-      { name: "GeeksforGeeks", use: "Coding problems + theory" },
-      { name: "HackerRank", use: "Practice + mock tests" },
-      { name: "LeetCode", use: "Coding problems (Easy-Medium)" },
-      { name: "IndiaBix", use: "Aptitude + Logical + Verbal" },
-      { name: "PrepInsta (Free)", use: "Accenture-specific mocks" },
-      { name: "W3Schools", use: "SQL practice" }
-    ]
-  };
-
-  const examDayStrategy = [
-    {
-      phase: "Before Exam",
-      tips: [
-        "Sleep 7-8 hours the night before",
-        "Light breakfast, avoid heavy meals",
-        "Reach early (30 min) or setup workspace if online",
-        "Keep water, ID, admit card ready"
-      ]
-    },
-    {
-      phase: "Time Allocation",
-      tips: [
-        "Aptitude MCQs: 40-45 min (45-60 sec per question)",
-        "Coding (2 problems): 60 min (25 min + 30 min + 5 min testing)",
-        "Essay: 10-15 min (2 plan + 10 write + 2 proofread)",
-        "Total buffer: 5-10 min for review"
-      ]
-    },
-    {
-      phase: "Coding Strategy",
-      tips: [
-        "Read problem twice carefully",
-        "Identify input, output, constraints",
-        "Think of approach (5 min), then code (15-20 min)",
-        "Test with sample input + edge cases",
-        "Always check: empty array, single element, negatives, zeros"
-      ]
-    },
-    {
-      phase: "General Tips",
-      tips: [
-        "Start with your strength (Coding OR Aptitude)",
-        "Don't spend >2 min on any MCQ - mark and move",
-        "Write clean code with comments",
-        "Partial credit is given - submit working code",
-        "Stay calm, trust your preparation"
-      ]
-    }
-  ];
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your progress...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
@@ -515,17 +489,24 @@ const OAPlan = () => {
             </div>
           </div>
           
+          {/* Overall Progress */}
+          <div className="mt-6 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-blue-100">Overall Problem Progress</span>
+              <span className="text-sm font-bold">{overallProgress.totalSolved} / {overallProgress.totalProblems}</span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-3">
+              <div 
+                className="bg-green-400 h-3 rounded-full transition-all duration-500"
+                style={{ width: `${overallProgress.percentage}%` }}
+              />
+            </div>
+            <div className="text-right text-sm text-blue-100 mt-1">{overallProgress.percentage}% Complete</div>
+          </div>
+          
           {/* Reset Button */}
           <button
-            onClick={() => {
-              if (window.confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-                localStorage.clear();
-                setCompletedTasks({});
-                setWeekNotes({});
-                setSolvedProblems({});
-                window.location.reload();
-              }
-            }}
+            onClick={resetAllProgress}
             className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-all"
           >
             🔄 Reset All Progress
@@ -562,86 +543,197 @@ const OAPlan = () => {
           </button>
         </div>
 
-        {/* Active Week Content or Problem Tracker */}
-        {!showProblemTracker ? (
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <div className="border-b pb-4 mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">{weeks[activeWeek].title}</h2>
-            <div className="flex gap-4 mt-2 text-sm">
-              <span className="text-gray-600 flex items-center gap-1">
-                <Calendar size={16} /> {weeks[activeWeek].dates}
-              </span>
-              <span className="text-purple-600 flex items-center gap-1">
-                <Target size={16} /> {weeks[activeWeek].focus}
-              </span>
+        {/* Problem Tracker View */}
+        {showProblemTracker ? (
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Problem Tracker</h2>
+            
+            {/* Category Tabs */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+              {Object.keys(allProblemSets).map((category) => {
+                const solved = getSolvedCount(category);
+                const total = allProblemSets[category].length;
+                return (
+                  <button
+                    key={category}
+                    onClick={() => setActiveTrackerTab(category)}
+                    className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${
+                      activeTrackerTab === category
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category.charAt(0).toUpperCase() + category.slice(1)} ({solved}/{total})
+                  </button>
+                );
+              })}
             </div>
-          </div>
 
-          {/* Week Notes Section */}
-          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <BookOpen className="text-blue-600" size={20} />
-              Week Notes & Key Learnings
-            </h3>
-            <textarea
-              value={weekNotes[activeWeek] || ''}
-              onChange={(e) => updateWeekNotes(activeWeek, e.target.value)}
-              placeholder="Add your notes here: • What went well this week? • Which topics need more practice? • Key patterns or concepts learned • Mistakes to avoid • Mock test scores and insights"
-              className="w-full h-32 p-4 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none resize-none text-gray-700 placeholder-gray-400"
-            />
-            <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
-              <AlertCircle size={12} />
-              Your notes are saved automatically as you type
+            {/* Difficulty Filter */}
+            <div className="flex gap-2 mb-6">
+              {['All', 'Easy', 'Medium', 'Hard'].map((difficulty) => (
+                <button
+                  key={difficulty}
+                  onClick={() => setDifficultyFilter(difficulty)}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    difficultyFilter === difficulty
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {difficulty}
+                </button>
+              ))}
             </div>
-          </div>
 
-          {weeks[activeWeek].days.map((dayGroup, dayIndex) => (
-            <div key={dayIndex} className="mb-8 last:mb-0">
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 mb-4">
-                <h3 className="text-xl font-bold text-gray-800">{dayGroup.day}</h3>
-                <p className="text-gray-600 text-sm mt-1">{dayGroup.title}</p>
+            {/* Progress Bar */}
+            <div className="mb-6 bg-gray-100 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-gray-700">Progress</span>
+                <span className="text-sm font-bold text-gray-700">{solvedCount} / {currentProblems.length}</span>
               </div>
-              
-              <div className="space-y-3 ml-4">
-                {dayGroup.tasks.map((task, taskIndex) => {
-                  const Icon = task.icon;
-                  const isCompleted = completedTasks[`${activeWeek}-${dayIndex}-${taskIndex}`];
-                  
-                  return (
-                    <div
-                      key={taskIndex}
-                      onClick={() => toggleTask(activeWeek, dayIndex, taskIndex)}
-                      className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all ${
-                        isCompleted
-                          ? 'bg-green-50 border-2 border-green-300'
-                          : 'bg-white border-2 border-gray-200 hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="mt-1">
-                        {isCompleted ? (
-                          <CheckCircle className="text-green-600" size={24} />
-                        ) : (
-                          <Circle className="text-gray-400" size={24} />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 flex-1">
-                            <Icon className={isCompleted ? 'text-green-600' : 'text-blue-600'} size={20} />
-                            <span className={`${isCompleted ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                              {task.text}
-                            </span>
-                          </div>
-                          <span className="flex items-center gap-1 text-sm text-gray-500 whitespace-nowrap">
-                            <Clock size={14} />
-                            {task.time}
-                          </span>
-                        </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="bg-green-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              <div className="text-right text-sm text-gray-600 mt-1">{progressPercentage}% Complete</div>
+            </div>
+
+            {/* Problems List */}
+            <div className="space-y-2">
+              {filteredProblems.map((problem, index) => {
+                const originalIndex = currentProblems.findIndex(p => p.id === problem.id);
+                const isSolved = solvedProblems[`${activeTrackerTab}-${originalIndex}`];
+                const difficultyColor = {
+                  Easy: 'text-green-600 bg-green-50',
+                  Medium: 'text-yellow-600 bg-yellow-50',
+                  Hard: 'text-red-600 bg-red-50'
+                }[problem.difficulty];
+
+                return (
+                  <div
+                    key={problem.id}
+                    onClick={() => toggleProblem(originalIndex)}
+                    className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all ${
+                      isSolved
+                        ? 'bg-green-50 border-2 border-green-300'
+                        : 'bg-white border-2 border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div>
+                      {isSolved ? (
+                        <CheckCircle className="text-green-600" size={24} />
+                      ) : (
+                        <Circle className="text-gray-400" size={24} />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`font-semibold ${isSolved ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                          {problem.name}
+                        </span>
+                        <span className={`text-xs px-2 py-1 rounded-full font-semibold ${difficultyColor}`}>
+                          {problem.difficulty}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {problem.category}
+                        </span>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* Week Content View */
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <div className="border-b pb-4 mb-6">
+              <h2 className="text-3xl font-bold text-gray-800">{weeks[activeWeek].title}</h2>
+              <div className="flex gap-4 mt-2 text-sm">
+                <span className="text-gray-600 flex items-center gap-1">
+                  <Calendar size={16} /> {weeks[activeWeek].dates}
+                </span>
+                <span className="text-purple-600 flex items-center gap-1">
+                  <Target size={16} /> {weeks[activeWeek].focus}
+                </span>
               </div>
             </div>
-          ))}
-        </div
+
+            {/* Week Notes Section */}
+            <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
+              <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <BookOpen className="text-blue-600" size={20} />
+                Week Notes & Key Learnings
+              </h3>
+              <textarea
+                value={weekNotes[activeWeek] || ''}
+                onChange={(e) => updateWeekNotes(activeWeek, e.target.value)}
+                placeholder="Add your notes here: • What went well this week? • Which topics need more practice? • Key patterns or concepts learned • Mistakes to avoid • Mock test scores and insights"
+                className="w-full h-32 p-4 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:outline-none resize-none text-gray-700 placeholder-gray-400"
+              />
+              <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                <AlertCircle size={12} />
+                Your notes are saved automatically as you type
+              </div>
+            </div>
+
+            {weeks[activeWeek].days.map((dayGroup, dayIndex) => (
+              <div key={dayIndex} className="mb-8 last:mb-0">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">{dayGroup.day}</h3>
+                  <p className="text-gray-600 text-sm mt-1">{dayGroup.title}</p>
+                </div>
+                
+                <div className="space-y-3 ml-4">
+                  {dayGroup.tasks.map((task, taskIndex) => {
+                    const Icon = task.icon;
+                    const isCompleted = completedTasks[`${activeWeek}-${dayIndex}-${taskIndex}`];
+                    
+                    return (
+                      <div
+                        key={taskIndex}
+                        onClick={() => toggleTask(activeWeek, dayIndex, taskIndex)}
+                        className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all ${
+                          isCompleted
+                            ? 'bg-green-50 border-2 border-green-300'
+                            : 'bg-white border-2 border-gray-200 hover:border-blue-300'
+                        }`}
+                      >
+                        <div className="mt-1">
+                          {isCompleted ? (
+                            <CheckCircle className="text-green-600" size={24} />
+                          ) : (
+                            <Circle className="text-gray-400" size={24} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 flex-1">
+                              <Icon className={isCompleted ? 'text-green-600' : 'text-blue-600'} size={20} />
+                              <span className={`${isCompleted ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                                {task.text}
+                              </span>
+                            </div>
+                            <span className="flex items-center gap-1 text-sm text-gray-500 whitespace-nowrap">
+                              <Clock size={14} />
+                              {task.time}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default OAPlan;
